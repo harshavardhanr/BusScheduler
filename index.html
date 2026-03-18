@@ -20,7 +20,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 16px;
     }
 
     header h1 {
@@ -176,7 +176,7 @@
     }
 
     .refresh-btn {
-      margin-top: 28px;
+      margin-bottom: 28px;
       background: #0f3460;
       color: #aaaacc;
       border: 1px solid #1a5276;
@@ -211,11 +211,11 @@
     <div id="last-updated"></div>
   </header>
 
+  <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">Refresh</button>
+
   <div class="bus-grid" id="bus-grid">
     <!-- Cards injected by JS -->
   </div>
-
-  <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">Refresh</button>
 
   <script>
     // Bus routes and the stops they depart from in the Higham Hill area
