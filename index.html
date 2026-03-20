@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Higham Hill Bus Tracker</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -105,6 +106,13 @@
       background: #0f3460;
       border-radius: 10px;
       padding: 12px 16px;
+      cursor: pointer;
+      transition: filter 0.15s, transform 0.15s;
+    }
+
+    .arrival-item:hover {
+      filter: brightness(1.25);
+      transform: translateY(-1px);
     }
 
     .arrival-item:first-child {
@@ -150,6 +158,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .map-hint {
+      font-size: 0.68rem;
+      color: #4455aa;
+      margin-top: 2px;
+      text-align: right;
     }
 
     .loading {
@@ -202,6 +217,104 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Map overlay ── */
+    #map-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #map-overlay.open { display: flex; }
+
+    #map-modal {
+      background: #16213e;
+      border-radius: 18px;
+      width: min(96vw, 620px);
+      height: min(88vh, 520px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #1a5276;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    #map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid #0f3460;
+      flex-shrink: 0;
+    }
+
+    #map-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    #map-subtitle {
+      font-size: 0.75rem;
+      color: #6666aa;
+      margin-top: 2px;
+    }
+
+    #map-close {
+      background: none;
+      border: none;
+      color: #8888aa;
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    #map-close:hover { color: #fff; background: #0f3460; }
+
+    #map {
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Custom Leaflet marker styles */
+    .bus-marker {
+      background: #1a5276;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 5px 9px;
+      border-radius: 10px;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+      border: 2px solid #5dade2;
+    }
+
+    .stop-marker {
+      background: #e1251b;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+    }
+
+    .user-marker {
+      background: #2ecc71;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
@@ -217,10 +330,22 @@
     <!-- Cards injected by JS -->
   </div>
 
+  <!-- Map overlay -->
+  <div id="map-overlay">
+    <div id="map-modal">
+      <div id="map-header">
+        <div>
+          <div id="map-title"></div>
+          <div id="map-subtitle"></div>
+        </div>
+        <button id="map-close" onclick="closeMap()" title="Close">✕</button>
+      </div>
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Bus routes and the stops they depart from in the Higham Hill area
-    // Stop 490008134E = Higham Hill Road (W15 & 158 towards Walthamstow / Stratford)
-    // Stop 490008132S = Higham Station Avenue (W11 towards Walthamstow / Highams Park)
     const BUSES = [
       {
         line: 'W15',
@@ -243,6 +368,11 @@
     ];
 
     const TFL_BASE = 'https://api.tfl.gov.uk';
+
+    // Cache arrivals per line so map can access them on click
+    const cachedArrivals = {};
+    // Cache stop lat/lon per stopId
+    const cachedStopCoords = {};
 
     function formatMins(seconds) {
       const m = Math.round(seconds / 60);
@@ -279,14 +409,26 @@
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      // Filter to this specific line, sort by timeToStation
       return data
         .filter(a => a.lineName.toUpperCase() === bus.line.toUpperCase())
         .sort((a, b) => a.timeToStation - b.timeToStation)
         .slice(0, 3);
     }
 
+    async function fetchStopCoords(stopId) {
+      if (cachedStopCoords[stopId]) return cachedStopCoords[stopId];
+      const res = await fetch(`${TFL_BASE}/StopPoint/${stopId}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.lat && data.lon) {
+        cachedStopCoords[stopId] = { lat: data.lat, lon: data.lon };
+        return cachedStopCoords[stopId];
+      }
+      return null;
+    }
+
     function renderArrivals(bus, arrivals) {
+      cachedArrivals[bus.line] = arrivals;
       const list = document.getElementById(`arrivals-${bus.line}`);
       if (!list) return;
 
@@ -300,16 +442,17 @@
         const clock = formatClock(a.expectedArrival);
         const towards = a.towards || a.destinationName || '';
         return `
-          <li class="arrival-item">
+          <li class="arrival-item" onclick="openMap('${bus.line}', ${i})" title="View on map">
             <div>
               ${isDue
                 ? `<div class="arrival-due">Due now</div>`
                 : `<div class="arrival-mins">${text}<span>min</span></div>`
               }
             </div>
-            <div style="text-align:right">
+            <div>
               <div class="arrival-time">${clock}</div>
               <div class="arrival-towards">${towards}</div>
+              <div class="map-hint">tap to map →</div>
             </div>
           </li>`;
       }).join('');
@@ -349,14 +492,127 @@
       btn.textContent = 'Refresh';
     }
 
-    // Build initial cards
+    // ── Map ──────────────────────────────────────────────────────────────────
+    let map = null;
+    let mapMarkers = [];
+
+    function clearMapMarkers() {
+      mapMarkers.forEach(m => m.remove());
+      mapMarkers = [];
+    }
+
+    function addMarker(latLng, iconHtml, anchorX, anchorY, popupHtml) {
+      const icon = L.divIcon({
+        className: '',
+        html: iconHtml,
+        iconAnchor: [anchorX, anchorY],
+      });
+      const marker = L.marker(latLng, { icon }).addTo(map);
+      if (popupHtml) marker.bindPopup(popupHtml);
+      mapMarkers.push(marker);
+      return latLng;
+    }
+
+    async function openMap(line, idx) {
+      const bus = BUSES.find(b => b.line === line);
+      const arrivals = cachedArrivals[line];
+      if (!bus || !arrivals) return;
+      const arrival = arrivals[idx];
+      if (!arrival) return;
+
+      const mins = Math.round(arrival.timeToStation / 60);
+      const minsLabel = mins <= 0 ? 'Due now' : `${mins} min`;
+      const dest = arrival.towards || arrival.destinationName || bus.towards;
+
+      document.getElementById('map-title').textContent = `${line}  ·  ${minsLabel}`;
+      document.getElementById('map-subtitle').textContent = `towards ${dest}`;
+      document.getElementById('map-overlay').classList.add('open');
+
+      // Initialise map once
+      if (!map) {
+        map = L.map('map', { zoomControl: true });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+        }).addTo(map);
+      }
+
+      // Must invalidate before adding markers so tiles load correctly
+      setTimeout(() => map.invalidateSize(), 80);
+      clearMapMarkers();
+
+      const bounds = [];
+
+      // ── Stop marker ──
+      const stopCoords = await fetchStopCoords(bus.stopId);
+      if (stopCoords) {
+        const ll = [stopCoords.lat, stopCoords.lon];
+        addMarker(
+          ll,
+          `<div class="stop-marker">${line}</div>`,
+          20, 14,
+          `<b>${bus.stopName}</b><br>Your stop`
+        );
+        bounds.push(ll);
+      }
+
+      // ── Bus vehicle marker (lat/lon from TfL arrival prediction) ──
+      const busLat = arrival.latitude;
+      const busLon = arrival.longitude;
+      if (busLat && busLon && !(busLat === 0 && busLon === 0)) {
+        const ll = [busLat, busLon];
+        addMarker(
+          ll,
+          `<div class="bus-marker">🚌 ${minsLabel}</div>`,
+          40, 16,
+          `<b>Bus ${line}</b><br>${minsLabel} to stop`
+        );
+        bounds.push(ll);
+      }
+
+      // ── User location marker ──
+      function fitMap(extraPoint) {
+        if (extraPoint) bounds.push(extraPoint);
+        if (bounds.length === 1) {
+          map.setView(bounds[0], 16);
+        } else if (bounds.length > 1) {
+          map.fitBounds(bounds, { padding: [48, 48], maxZoom: 17 });
+        }
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const ll = [pos.coords.latitude, pos.coords.longitude];
+            addMarker(
+              ll,
+              `<div class="user-marker"></div>`,
+              8, 8,
+              '<b>You</b>'
+            );
+            fitMap(ll);
+          },
+          () => fitMap(null),
+          { timeout: 6000 }
+        );
+      } else {
+        fitMap(null);
+      }
+    }
+
+    function closeMap() {
+      document.getElementById('map-overlay').classList.remove('open');
+    }
+
+    // Close on backdrop click
+    document.getElementById('map-overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('map-overlay')) closeMap();
+    });
+
+    // Build cards and fetch
     const grid = document.getElementById('bus-grid');
     BUSES.forEach(bus => grid.appendChild(buildCard(bus)));
-
-    // Initial fetch
     fetchAll();
-
-    // Auto-refresh every 60 seconds
     setInterval(fetchAll, 60000);
   </script>
 </body>
