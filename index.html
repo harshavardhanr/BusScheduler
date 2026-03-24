@@ -8,211 +8,259 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #1a1a2e;
-      color: #eee;
+      font-family: 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', Arial, sans-serif;
+      background: #f3f2ef;
+      color: #1e1e1e;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-
-    header h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.5px;
-    }
-
-    header p {
-      font-size: 0.85rem;
-      color: #8888aa;
-      margin-top: 4px;
-    }
-
-    #last-updated {
-      font-size: 0.75rem;
-      color: #6666aa;
-      margin-top: 8px;
-    }
-
-    .bus-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
+    /* ── TfL Header ── */
+    .tfl-header {
+      background: #dc241f;
       width: 100%;
-      max-width: 900px;
+      margin-bottom: 28px;
     }
 
-    .bus-card {
-      background: #16213e;
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid #0f3460;
-    }
-
-    .bus-card-header {
+    .tfl-header-inner {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 14px 20px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 18px;
+      gap: 16px;
     }
 
-    .bus-badge {
-      font-size: 1.1rem;
-      font-weight: 800;
-      padding: 6px 14px;
-      border-radius: 8px;
-      min-width: 64px;
-      text-align: center;
-      letter-spacing: 0.5px;
+    .tfl-header-text { color: #fff; }
+
+    .tfl-header-text h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
     }
 
-    .badge-W15  { background: #e1251b; color: #fff; }
-    .badge-158  { background: #e1251b; color: #fff; }
-    .badge-W11  { background: #e1251b; color: #fff; }
-
-    .bus-destination {
-      font-size: 0.8rem;
-      color: #8888aa;
-      line-height: 1.3;
+    .tfl-header-text p {
+      font-size: 0.82rem;
+      margin-top: 2px;
+      opacity: 0.88;
     }
 
-    .bus-destination strong {
-      display: block;
-      color: #ccccee;
-      font-size: 0.9rem;
-      margin-bottom: 2px;
-    }
+    /* TfL Roundel */
+    .roundel { width: 52px; height: 52px; flex-shrink: 0; }
 
-    .arrivals-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .arrival-item {
+    /* ── Controls ── */
+    .controls {
+      max-width: 940px;
+      width: 100%;
+      padding: 0 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #0f3460;
-      border-radius: 10px;
-      padding: 12px 16px;
+      margin-bottom: 18px;
     }
 
-    .arrival-item:first-child {
-      background: #1a5276;
-      border: 1px solid #2980b9;
-    }
-
-    .arrival-mins {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #fff;
-      min-width: 60px;
-    }
-
-    .arrival-item:first-child .arrival-mins {
-      color: #5dade2;
-    }
-
-    .arrival-mins span {
-      font-size: 0.75rem;
-      font-weight: 400;
-      color: #8888aa;
-      margin-left: 3px;
-    }
-
-    .arrival-due {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #2ecc71;
-    }
-
-    .arrival-time {
-      font-size: 0.8rem;
-      color: #8888aa;
-      text-align: right;
-    }
-
-    .arrival-towards {
+    #last-updated {
       font-size: 0.78rem;
-      color: #aaaacc;
-      max-width: 120px;
-      text-align: right;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .loading {
-      color: #6666aa;
-      font-size: 0.9rem;
-      padding: 20px 0;
-      text-align: center;
-    }
-
-    .error {
-      color: #e74c3c;
-      font-size: 0.85rem;
-      padding: 12px;
-      background: #2c1010;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    .no-service {
-      color: #6666aa;
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 16px 0;
+      color: #6b6b6b;
     }
 
     .refresh-btn {
-      margin-bottom: 28px;
-      background: #0f3460;
-      color: #aaaacc;
-      border: 1px solid #1a5276;
-      border-radius: 8px;
-      padding: 10px 24px;
-      font-size: 0.85rem;
+      background: #fff;
+      color: #dc241f;
+      border: 2px solid #dc241f;
+      border-radius: 3px;
+      padding: 7px 18px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s;
+      letter-spacing: 0.4px;
+      transition: background 0.15s, color 0.15s;
+      text-transform: uppercase;
     }
 
-    .refresh-btn:hover { background: #1a5276; color: #fff; }
+    .refresh-btn:hover { background: #dc241f; color: #fff; }
+    .refresh-btn:disabled { opacity: 0.5; cursor: default; }
 
+    /* ── Bus Grid ── */
+    .bus-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      width: 100%;
+      max-width: 940px;
+      padding: 0 20px 40px;
+    }
+
+    /* ── Bus Card ── */
+    .bus-card {
+      background: #fff;
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.14), 0 1px 8px rgba(0,0,0,0.06);
+    }
+
+    .bus-card-header {
+      background: #dc241f;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Route flag — white on red, mimicking the stop flag */
+    .bus-badge {
+      background: #fff;
+      color: #dc241f;
+      font-size: 1.15rem;
+      font-weight: 800;
+      padding: 5px 13px;
+      border-radius: 2px;
+      min-width: 60px;
+      text-align: center;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    .bus-destination { color: #fff; }
+
+    .bus-destination strong {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .bus-destination span {
+      font-size: 0.76rem;
+      opacity: 0.85;
+      margin-top: 1px;
+      display: block;
+    }
+
+    /* ── Arrivals list ── */
+    .arrivals-list { list-style: none; }
+
+    /* Countdown-style departure row */
+    .arrival-item {
+      display: flex;
+      align-items: center;
+      padding: 11px 16px;
+      border-bottom: 1px solid #ebebeb;
+      gap: 14px;
+    }
+
+    .arrival-item:last-child { border-bottom: none; }
+
+    /* Minutes — big, left-aligned, TfL Countdown style */
+    .arrival-mins {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e1e1e;
+      line-height: 1;
+      min-width: 58px;
+    }
+
+    .arrival-mins span {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-top: 3px;
+    }
+
+    /* Highlight next bus in TfL red */
+    .arrival-item:first-child .arrival-mins { color: #dc241f; }
+
+    .arrival-due {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #dc241f;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      min-width: 58px;
+    }
+
+    .arrival-info { flex: 1; min-width: 0; }
+
+    .arrival-towards {
+      font-size: 0.88rem;
+      color: #1e1e1e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .arrival-time {
+      font-size: 0.72rem;
+      color: #888;
+      margin-top: 3px;
+    }
+
+    /* ── States ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 16px;
+      color: #888;
+      font-size: 0.88rem;
+    }
+
+    .error {
+      padding: 14px 16px;
+      color: #dc241f;
+      font-size: 0.84rem;
+    }
+
+    .no-service {
+      padding: 16px;
+      color: #888;
+      font-size: 0.84rem;
+    }
+
+    /* Spinner in TfL red */
     .spinner {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 2px solid #8888aa;
-      border-top-color: #fff;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #ddd;
+      border-top-color: #dc241f;
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-right: 6px;
-      vertical-align: middle;
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-
   </style>
 </head>
 <body>
-  <header>
-    <h1>Higham Hill Bus Tracker</h1>
-    <p>Live departures from Higham Hill, Walthamstow</p>
-    <div id="last-updated"></div>
+
+  <header class="tfl-header">
+    <div class="tfl-header-inner">
+      <!-- TfL Roundel -->
+      <svg class="roundel" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Transport for London">
+        <defs>
+          <clipPath id="rc"><circle cx="50" cy="50" r="44"/></clipPath>
+        </defs>
+        <circle cx="50" cy="50" r="44" fill="#dc241f"/>
+        <rect x="4" y="37" width="92" height="26" fill="#1c3f94" clip-path="url(#rc)"/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#fff" stroke-width="7"/>
+      </svg>
+      <div class="tfl-header-text">
+        <h1>Higham Hill Bus Tracker</h1>
+        <p>Live departures · Walthamstow</p>
+      </div>
+    </div>
   </header>
 
-  <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">Refresh</button>
+  <div class="controls">
+    <div id="last-updated"></div>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">Refresh</button>
+  </div>
 
   <div class="bus-grid" id="bus-grid">
     <!-- Cards injected by JS -->
@@ -259,14 +307,14 @@
       card.id = `card-${bus.line}`;
       card.innerHTML = `
         <div class="bus-card-header">
-          <div class="bus-badge badge-${bus.line}">${bus.line}</div>
+          <div class="bus-badge">${bus.line}</div>
           <div class="bus-destination">
             <strong>${bus.stopName}</strong>
-            towards ${bus.towards}
+            <span>towards ${bus.towards}</span>
           </div>
         </div>
         <ul class="arrivals-list" id="arrivals-${bus.line}">
-          <li class="loading"><span class="spinner"></span>Loading...</li>
+          <li class="loading"><span class="spinner"></span>Loading…</li>
         </ul>
       `;
       return card;
@@ -282,6 +330,7 @@
         .sort((a, b) => a.timeToStation - b.timeToStation)
         .slice(0, 3);
     }
+
     function renderArrivals(bus, arrivals) {
       const list = document.getElementById(`arrivals-${bus.line}`);
       if (!list) return;
@@ -297,15 +346,13 @@
         const towards = a.towards || a.destinationName || '';
         return `
           <li class="arrival-item">
-            <div>
-              ${isDue
-                ? `<div class="arrival-due">Due now</div>`
-                : `<div class="arrival-mins">${text}<span>min</span></div>`
-              }
-            </div>
-            <div>
-              <div class="arrival-time">${clock}</div>
+            ${isDue
+              ? `<div class="arrival-due">Due</div>`
+              : `<div class="arrival-mins">${text}<span>min</span></div>`
+            }
+            <div class="arrival-info">
               <div class="arrival-towards">${towards}</div>
+              <div class="arrival-time">${clock}</div>
             </div>
           </li>`;
       }).join('');
@@ -318,7 +365,7 @@
 
     function renderLoading(bus) {
       const list = document.getElementById(`arrivals-${bus.line}`);
-      if (list) list.innerHTML = '<li class="loading"><span class="spinner"></span>Loading...</li>';
+      if (list) list.innerHTML = '<li class="loading"><span class="spinner"></span>Loading…</li>';
     }
 
     async function fetchAll() {
@@ -345,7 +392,6 @@
       btn.textContent = 'Refresh';
     }
 
-    // Build cards and fetch
     const grid = document.getElementById('bus-grid');
     BUSES.forEach(bus => grid.appendChild(buildCard(bus)));
     fetchAll();
